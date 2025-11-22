@@ -2,7 +2,7 @@
 using LibraryManagement.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LibraryManagement.Service
+namespace LibraryManagement.Service.interfaces
 {
     /// <summary>
     /// Interface is being used for handling books related operations.

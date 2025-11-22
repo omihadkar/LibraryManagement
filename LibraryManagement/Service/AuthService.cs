@@ -1,6 +1,7 @@
 ﻿using LibraryManagement.Context;
 using LibraryManagement.Models;
 using LibraryManagement.Models.Dto;
+using LibraryManagement.Service.interfaces;
 using LibraryManagement.Utils;
 
 namespace LibraryManagement.Service

@@ -1,6 +1,7 @@
 using LibraryManagement.Context;
 using LibraryManagement.Models;
 using LibraryManagement.Service;
+using LibraryManagement.Service.interfaces;
 using LibraryManagement.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;

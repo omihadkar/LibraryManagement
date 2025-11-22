@@ -4,8 +4,8 @@ using LibraryManagement.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using LibraryManagement.Service;
 using LibraryManagement.Exceptions;
+using LibraryManagement.Service.interfaces;
 
 namespace LibraryManagement.Controllers
 {

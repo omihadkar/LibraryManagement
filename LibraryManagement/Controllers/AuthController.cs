@@ -1,7 +1,7 @@
 ﻿using LibraryManagement.Context;
 using LibraryManagement.Models;
 using LibraryManagement.Models.Dto;
-using LibraryManagement.Service;
+using LibraryManagement.Service.interfaces;
 using LibraryManagement.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;

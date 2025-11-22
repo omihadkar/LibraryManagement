@@ -1,6 +1,6 @@
 ﻿using LibraryManagement.Models;
 
-namespace LibraryManagement.Service
+namespace LibraryManagement.Service.interfaces
 {
     /// <summary>
     /// Interface for token related operations

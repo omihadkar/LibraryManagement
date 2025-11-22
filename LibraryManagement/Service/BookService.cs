@@ -2,6 +2,7 @@
 using LibraryManagement.Exceptions;
 using LibraryManagement.Models;
 using LibraryManagement.Models.Dto;
+using LibraryManagement.Service.interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
