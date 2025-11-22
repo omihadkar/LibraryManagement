@@ -61,6 +61,7 @@ builder.Services.AddAuthorization();
 //Dependency registration
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
 

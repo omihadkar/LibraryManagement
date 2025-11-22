@@ -16,12 +16,10 @@ namespace LibraryManagement.Controllers
     [Route("api/[controller]")]
     public class BooksController : ControllerBase
     {
-        private readonly LibraryContext _context;
-        private readonly IBookService bookService;        
+        private readonly IBookService bookService;
 
-        public BooksController(LibraryContext context, IBookService bookService)
+        public BooksController(IBookService bookService)
         {
-            _context = context;
             this.bookService = bookService;
         }
 
@@ -33,7 +31,15 @@ namespace LibraryManagement.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
         {
-            return new OkObjectResult(await bookService.GetBooks());
+            try
+            {
+                return new OkObjectResult(await bookService.GetBooks());
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");
+            }
+            
         }
 
         /// <summary>

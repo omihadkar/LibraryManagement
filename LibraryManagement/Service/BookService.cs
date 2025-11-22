@@ -12,13 +12,13 @@ namespace LibraryManagement.Service
     /// </summary>
     public class BookService : IBookService
     {
-        private readonly LibraryContext _context;
-        private readonly ILogger<BookService> _logger;
+        private readonly LibraryContext context;
+        private readonly ILogger<BookService> logger;
 
         public BookService(LibraryContext context, ILogger<BookService> logger)
         {
-            this._context = context;
-            _logger = logger;
+            this.context = context;
+            this.logger = logger;
         }
 
         /// <summary>
@@ -39,13 +39,13 @@ namespace LibraryManagement.Service
                     TotalCopies = bookDto.Copies,
                     AvailableCopies = bookDto.Copies
                 };
-                _context.Books.Add(book);
-                await _context.SaveChangesAsync();
+                context.Books.Add(book);
+                await context.SaveChangesAsync();
                 return book;
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while creating new books. The exception is {}", ex);
+                logger.LogError("Error while creating new books. The exception is {}", ex);
                 throw;
             }
         }
@@ -60,22 +60,22 @@ namespace LibraryManagement.Service
         {
             try
             {
-                var book = await _context.Books.FindAsync(id);
+                var book = await context.Books.FindAsync(id);
                 if (book == null)
                     throw new NotFoundException("Book Not found");
 
-                var hasActiveBorrows = await _context.BorrowRecords
+                var hasActiveBorrows = await context.BorrowRecords
                     .AnyAsync(br => br.BookId == id && !br.IsReturned);
 
                 if (hasActiveBorrows)
                     throw new BooksCanNotDeleteException("Cannot delete book with active borrows");
 
-                _context.Books.Remove(book);
-                await _context.SaveChangesAsync();
+                context.Books.Remove(book);
+                await context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while deleting book. The exception is {}", ex);
+                logger.LogError("Error while deleting book. The exception is {}", ex);
                 throw;
             }
         }
@@ -90,7 +90,7 @@ namespace LibraryManagement.Service
         {
             try
             {
-                var book = await _context.Books.FindAsync(id);
+                var book = await context.Books.FindAsync(id);
                 if (book == null)
                 {
                     throw new NotFoundException("Book Not found");
@@ -99,7 +99,7 @@ namespace LibraryManagement.Service
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while fetching book record. The exception is {}", ex);
+                logger.LogError("Error while fetching book record. The exception is {}", ex);
                 throw;
             }
         }
@@ -114,11 +114,11 @@ namespace LibraryManagement.Service
         {
             try
             {
-                return await _context.Books.ToListAsync();
+                return await context.Books.ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while fetching books {}", ex);
+                logger.LogError("Error while fetching books {}", ex);
                 throw;
             }
         }
@@ -134,7 +134,7 @@ namespace LibraryManagement.Service
         {
             try
             {
-                var book = await _context.Books.FindAsync(id);
+                var book = await context.Books.FindAsync(id);
                 if (book == null)
                     throw new NotFoundException("Book Not found");
 
@@ -145,11 +145,11 @@ namespace LibraryManagement.Service
                 var copyDifference = bookDto.Copies - book.TotalCopies;
                 book.TotalCopies = bookDto.Copies;
                 book.AvailableCopies += copyDifference;
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError("Error while updating books {}", ex);
+                logger.LogError("Error while updating books {}", ex);
                 throw;
             }
         }

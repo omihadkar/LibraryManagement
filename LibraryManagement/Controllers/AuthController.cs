@@ -20,11 +20,13 @@ namespace LibraryManagement.Controllers
     {
         private readonly LibraryContext context;
         private readonly ITokenService tokenService;
+        private readonly IAuthService authService;
 
-        public AuthController(LibraryContext context, ITokenService tokenService)
+        public AuthController(LibraryContext context, ITokenService tokenService, IAuthService authService)
         {
             this.context = context;
             this.tokenService = tokenService;
+            this.authService = authService;
         }
 
         /// <summary>
@@ -33,16 +35,23 @@ namespace LibraryManagement.Controllers
         /// <param name="loginDto"></param>
         /// <returns>JWT token</returns>        
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var user = context.Users.FirstOrDefault(u =>
-                u.Username == loginDto.Username && u.Password == loginDto.Password);
+            try
+            {
+                var token = await authService.Login(loginDto);
+                return Ok(new { token });
+            }
+            catch (UnauthorizedAccessException unauthorizedException)
+            {
+                return Unauthorized(unauthorizedException.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");
+                throw;
+            }
 
-            if (user == null)
-                return Unauthorized(new { message = "Invalid credentials" });
-
-            var token = tokenService.GenerateToken(user);
-            return Ok(new { token });
         }
 
         /// <summary>
@@ -51,21 +60,22 @@ namespace LibraryManagement.Controllers
         /// <param name="registerDto"></param>
         /// <returns>Whether user has registered.</returns>
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterDto registerDto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            if (context.Users.Any(u => u.Username == registerDto.Username))
-                return BadRequest(new { message = "Username already exists" });
-
-            var user = new User
+            try
             {
-                Username = registerDto.Username,
-                Password = registerDto.Password,
-                Role = Constants.CLIENT_ROLE
-            };
-
-            context.Users.Add(user);
-            context.SaveChanges();
-            return Ok(new { message = "User registered successfully", userId = user.Id });
+                await authService.Register(registerDto);
+                return Ok(new { message = "User registered successfully" });
+            }
+            catch (BadHttpRequestException badRequest)
+            {
+                return BadRequest(badRequest.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");
+                throw;
+            }
         }
     }
 }
