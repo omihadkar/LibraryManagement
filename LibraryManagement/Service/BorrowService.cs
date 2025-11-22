@@ -2,6 +2,9 @@
 using LibraryManagement.Exceptions;
 using LibraryManagement.Models;
 using LibraryManagement.Service.interfaces;
+using LibraryManagement.Utils;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -31,7 +34,7 @@ namespace LibraryManagement.Service
         public async Task BorrowBook(int bookId, int userId)
         {
             try
-            {
+            {                
                 var book = await context.Books.FindAsync(bookId);
 
                 if (book == null)
@@ -137,10 +140,12 @@ namespace LibraryManagement.Service
         /// <param name="borrowId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public async Task ReturnBook(int borrowId, int userId)
+        public async Task ReturnBook(int borrowId, ClaimsPrincipal user)
         {
             try
             {
+                var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
                 var borrowRecord = await context.BorrowRecords
                 .Include(br => br.Book)
                 .FirstOrDefaultAsync(br => br.Id == borrowId);
@@ -148,8 +153,12 @@ namespace LibraryManagement.Service
                 if (borrowRecord == null)
                     throw new NotFoundException("Borrow record not found");
 
+                // To handle case wherein apart from librarian nobody should return others book.
+                if (borrowRecord.UserId != userId && !user.IsInRole(Constants.LIBRARIAN_ROLE))
+                    throw new ForbiddenActionException("Returning others book is not allowed. Contact librarian.");
+
                 if (borrowRecord.IsReturned)
-                    throw new BadHttpRequestException("Book already returned");
+                    throw new BadHttpRequestException("Book already returned");                
 
                 borrowRecord.IsReturned = true;
                 borrowRecord.ReturnDate = DateTime.UtcNow;
@@ -159,8 +168,8 @@ namespace LibraryManagement.Service
             }
             catch (Exception ex)
             {
-                logger.LogError("Error while returning book for borrow id {} and user id {}. " +
-                    "The exception is {}", [borrowId, userId, ex]);
+                logger.LogError("Error while returning book for borrow id {}. " +
+                    "The exception is {}", [borrowId, ex]);
                 throw;
             }
 

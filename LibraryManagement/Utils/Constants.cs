@@ -10,5 +10,6 @@
         public static String JWT_AUDIENCE = "Jwt:Audience";
         public static String JWT_EXPIRY = "Jwt:ExpiryMinutes";
         public static String CLIENT_ROLE = "Client";
+        public static String LIBRARIAN_ROLE = "Librarian";
     }
 }
