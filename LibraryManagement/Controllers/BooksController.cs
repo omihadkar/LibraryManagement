@@ -4,92 +4,138 @@ using LibraryManagement.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LibraryManagement.Exceptions;
+using LibraryManagement.Service.interfaces;
 
 namespace LibraryManagement.Controllers
 {
+    /// <summary>
+    /// Controller contains different actions related to books
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     public class BooksController : ControllerBase
     {
-        private readonly LibraryContext _context;
+        private readonly IBookService bookService;
 
-        public BooksController(LibraryContext context)
+        public BooksController(IBookService bookService)
         {
-            _context = context;
+            this.bookService = bookService;
         }
 
+        /// <summary>
+        /// Fetches all the books.
+        /// TODO: Pagination is pending
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Book>>> GetBooks()
         {
-            var books = await _context.Books.ToListAsync();
-            return books;
+            try
+            {
+                return new OkObjectResult(await bookService.GetBooks());
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");
+            }
+            
         }
 
+        /// <summary>
+        /// Get specific book based on id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ActionResult<Book>> GetBook(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
+            try
+            {
+                var book = await bookService.GetBook(id);
+                return new OkObjectResult(book);
+            }
+            catch (NotFoundException)
+            {
                 return NotFound();
-            return book;
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
 
+        /// <summary>
+        /// Create new book record. Restricted to Librarian.
+        /// </summary>
+        /// <param name="bookDto"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Librarian")]
         [HttpPost]
         public async Task<ActionResult<Book>> CreateBook([FromBody] BookDto bookDto)
         {
-            var book = new Book
+            try
             {
-                Title = bookDto.Title,
-                Author = bookDto.Author,
-                ISBN = bookDto.ISBN,
-                TotalCopies = bookDto.Copies,
-                AvailableCopies = bookDto.Copies
-            };
-
-            _context.Books.Add(book);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
+                var bookCreated = await bookService.CreateBook(bookDto);
+                return CreatedAtAction(nameof(GetBook), new { id = bookCreated?.Id }, bookCreated);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
 
+        /// <summary>
+        /// Update book record. Restricted to Librarian.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="bookDto"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Librarian")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBook(int id, [FromBody] BookDto bookDto)
         {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
+            try
+            {
+                await bookService.UpdateBook(id, bookDto);
+                return NoContent();
+            }
+            catch (NotFoundException)
+            {
                 return NotFound();
-
-            book.Title = bookDto.Title;
-            book.Author = bookDto.Author;
-            book.ISBN = bookDto.ISBN;
-
-            var copyDifference = bookDto.Copies - book.TotalCopies;
-            book.TotalCopies = bookDto.Copies;
-            book.AvailableCopies += copyDifference;
-
-            await _context.SaveChangesAsync();
-            return NoContent();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
 
+        /// <summary>
+        /// Delete book record. Restricted to Librarian.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [Authorize(Roles = "Librarian")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBook(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
+            try
+            {
+                await bookService.DeleteBook(id);
+                return NoContent();
+            }
+            catch (NotFoundException)
+            {
                 return NotFound();
-
-            var hasActiveBorrows = await _context.BorrowRecords
-                .AnyAsync(br => br.BookId == id && !br.IsReturned);
-
-            if (hasActiveBorrows)
-                return BadRequest(new { message = "Cannot delete book with active borrows" });
-
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            }
+            catch (BooksCanNotDeleteException exception)
+            {
+                return BadRequest(new { message = exception.Message });
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");
+            }
         }
     }
 }

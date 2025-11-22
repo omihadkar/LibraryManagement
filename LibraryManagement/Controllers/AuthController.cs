@@ -1,6 +1,8 @@
 ﻿using LibraryManagement.Context;
 using LibraryManagement.Models;
 using LibraryManagement.Models.Dto;
+using LibraryManagement.Service.interfaces;
+using LibraryManagement.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -9,66 +11,69 @@ using System.Text;
 
 namespace LibraryManagement.Controllers
 {
+    /// <summary>
+    /// Controller for managing Authnetication related actions.
+    /// </summary>
+    [ApiController]
+    [Route("api/[controller]")]
     public class AuthController : Controller
     {
-        private readonly LibraryContext _context;
-        private readonly string _jwtKey = "19b4cbbfe1c17de8df5bb4c6c4078400";
+        private readonly LibraryContext context;
+        private readonly ITokenService tokenService;
+        private readonly IAuthService authService;
 
-        public AuthController(LibraryContext context)
+        public AuthController(LibraryContext context, ITokenService tokenService, IAuthService authService)
         {
-            _context = context;
+            this.context = context;
+            this.tokenService = tokenService;
+            this.authService = authService;
         }
 
+        /// <summary>
+        /// Helps to login user and returns back JWT token which can be used for further protected endpoints.         
+        /// </summary>
+        /// <param name="loginDto"></param>
+        /// <returns>JWT token</returns>        
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDto loginDto)
+        public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
         {
-            var user = _context.Users.FirstOrDefault(u =>
-                u.Username == loginDto.Username && u.Password == loginDto.Password);
+            try
+            {
+                var token = await authService.Login(loginDto);
+                return Ok(new { token });
+            }
+            catch (UnauthorizedAccessException unauthorizedException)
+            {
+                return Unauthorized(unauthorizedException.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");                
+            }
 
-            if (user == null)
-                return Unauthorized(new { message = "Invalid credentials" });
-
-            var token = GenerateJwtToken(user);
-            return Ok(new { token, role = user.Role, userId = user.Id });
         }
 
+        /// <summary>
+        /// Method is being used for registering the users
+        /// </summary>
+        /// <param name="registerDto"></param>
+        /// <returns>Whether user has registered.</returns>
         [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterDto registerDto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-            if (_context.Users.Any(u => u.Username == registerDto.Username))
-                return BadRequest(new { message = "Username already exists" });
-
-            var user = new User
+            try
             {
-                Username = registerDto.Username,
-                Password = registerDto.Password,
-                Role = "Client"
-            };
-
-            _context.Users.Add(user);
-            _context.SaveChanges();
-
-            return Ok(new { message = "User registered successfully", userId = user.Id });
-        }
-
-        private string GenerateJwtToken(User user)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtKey);
-            var tokenDescriptor = new SecurityTokenDescriptor
+                await authService.Register(registerDto);
+                return Ok(new { message = "User registered successfully" });
+            }
+            catch (BadHttpRequestException badRequest)
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role)
-            }),
-                Expires = DateTime.UtcNow.AddDays(7),
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+                return BadRequest(badRequest.Message);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An unexpected error occurred.");                
+            }
         }
     }
 }

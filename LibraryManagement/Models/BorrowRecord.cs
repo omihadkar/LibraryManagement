@@ -1,5 +1,8 @@
 ﻿namespace LibraryManagement.Models
 {
+    /// <summary>
+    /// Model class for the BorrowRecord
+    /// </summary>
     public class BorrowRecord
     {
         public int Id { get; set; }
