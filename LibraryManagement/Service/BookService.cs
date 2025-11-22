@@ -13,9 +13,12 @@ namespace LibraryManagement.Service
     public class BookService : IBookService
     {
         private readonly LibraryContext _context;
-        public BookService(LibraryContext context)
+        private readonly ILogger<BookService> _logger;
+
+        public BookService(LibraryContext context, ILogger<BookService> logger)
         {
             this._context = context;
+            _logger = logger;
         }
 
         /// <summary>
@@ -26,17 +29,25 @@ namespace LibraryManagement.Service
         /// <exception cref="NotImplementedException"></exception>
         public async Task<Book> CreateBook(BookDto bookDto)
         {
-            var book = new Book
+            try
             {
-                Title = bookDto.Title,
-                Author = bookDto.Author,
-                ISBN = bookDto.ISBN,
-                TotalCopies = bookDto.Copies,
-                AvailableCopies = bookDto.Copies
-            };
-            _context.Books.Add(book);
-            await _context.SaveChangesAsync();
-            return book;
+                var book = new Book
+                {
+                    Title = bookDto.Title,
+                    Author = bookDto.Author,
+                    ISBN = bookDto.ISBN,
+                    TotalCopies = bookDto.Copies,
+                    AvailableCopies = bookDto.Copies
+                };
+                _context.Books.Add(book);
+                await _context.SaveChangesAsync();
+                return book;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while creating new books. The exception is {}", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -47,18 +58,26 @@ namespace LibraryManagement.Service
         /// <exception cref="NotImplementedException"></exception>
         public async Task DeleteBook(int id)
         {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
-                throw new NotFoundException("Book Not found");
+            try
+            {
+                var book = await _context.Books.FindAsync(id);
+                if (book == null)
+                    throw new NotFoundException("Book Not found");
 
-            var hasActiveBorrows = await _context.BorrowRecords
-                .AnyAsync(br => br.BookId == id && !br.IsReturned);
+                var hasActiveBorrows = await _context.BorrowRecords
+                    .AnyAsync(br => br.BookId == id && !br.IsReturned);
 
-            if (hasActiveBorrows)
-                throw new BooksCanNotDeleteException("Cannot delete book with active borrows");
+                if (hasActiveBorrows)
+                    throw new BooksCanNotDeleteException("Cannot delete book with active borrows");
 
-            _context.Books.Remove(book);
-            await _context.SaveChangesAsync();            
+                _context.Books.Remove(book);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while deleting book. The exception is {}", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -67,9 +86,22 @@ namespace LibraryManagement.Service
         /// <param name="id"></param>
         /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<Book?> GetBook(int id)
+        public async Task<Book> GetBook(int id)
         {
-            return await _context.Books.FindAsync(id);
+            try
+            {
+                var book = await _context.Books.FindAsync(id);
+                if (book == null)
+                {
+                    throw new NotFoundException("Book Not found");
+                }
+                return book;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while fetching book record. The exception is {}", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -80,7 +112,15 @@ namespace LibraryManagement.Service
         /// <exception cref="NotImplementedException"></exception>
         public async Task<IEnumerable<Book>> GetBooks()
         {
-            return await _context.Books.ToListAsync();
+            try
+            {
+                return await _context.Books.ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while fetching books {}", ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -90,21 +130,28 @@ namespace LibraryManagement.Service
         /// <param name="bookDto"></param>
         /// <returns>true/false</returns>
         /// <exception cref="NotImplementedException"></exception>
-        public async Task<bool> UpdateBook(int id, [FromBody] BookDto bookDto)
+        public async Task UpdateBook(int id, [FromBody] BookDto bookDto)
         {
-            var book = await _context.Books.FindAsync(id);
-            if (book == null)
-                return false;
+            try
+            {
+                var book = await _context.Books.FindAsync(id);
+                if (book == null)
+                    throw new NotFoundException("Book Not found");
 
-            book.Title = bookDto.Title;
-            book.Author = bookDto.Author;
-            book.ISBN = bookDto.ISBN;
+                book.Title = bookDto.Title;
+                book.Author = bookDto.Author;
+                book.ISBN = bookDto.ISBN;
 
-            var copyDifference = bookDto.Copies - book.TotalCopies;
-            book.TotalCopies = bookDto.Copies;
-            book.AvailableCopies += copyDifference;
-            await _context.SaveChangesAsync();
-            return true;
+                var copyDifference = bookDto.Copies - book.TotalCopies;
+                book.TotalCopies = bookDto.Copies;
+                book.AvailableCopies += copyDifference;
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error while updating books {}", ex);
+                throw;
+            }
         }
     }
 }
