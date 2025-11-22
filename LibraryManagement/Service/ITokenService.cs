@@ -2,9 +2,9 @@
 
 namespace LibraryManagement.Service
 {
-    /**
-     * Interface for token related operations
-     */
+    /// <summary>
+    /// Interface for token related operations
+    /// </summary>
     public interface ITokenService
     {
         string GenerateToken(User user);

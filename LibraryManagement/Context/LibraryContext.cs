@@ -5,6 +5,9 @@ using System.Reflection.Emit;
 
 namespace LibraryManagement.Context
 {
+    /// <summary>
+    /// Library context to store data such as Users, books and Borrow records.
+    /// </summary>
     public class LibraryContext : DbContext
     {
         public LibraryContext(DbContextOptions<LibraryContext> options) : base(options) { }
@@ -13,6 +16,10 @@ namespace LibraryManagement.Context
         public DbSet<Book> Books { get; set; }
         public DbSet<BorrowRecord> BorrowRecords { get; set; }
 
+        /// <summary>
+        /// Method used for enforcing various constraints after model creation.
+        /// </summary>
+        /// <param name="modelBuilder"></param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<BorrowRecord>()

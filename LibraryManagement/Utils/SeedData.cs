@@ -3,8 +3,15 @@ using LibraryManagement.Models;
 
 namespace LibraryManagement.Utils
 {
+    /// <summary>
+    /// Class helps to seed initial data to start api.
+    /// </summary>
     public static class SeedData
     {
+        /// <summary>
+        /// Method initializes data for the DB context
+        /// </summary>
+        /// <param name="context"></param>
         public static void Initialize(LibraryContext context)
         {
             if (!context.Users.Any())

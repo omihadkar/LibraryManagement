@@ -7,9 +7,9 @@ using System.Text;
 
 namespace LibraryManagement.Service
 {
-    /**
-     * The class is responsible for handling token generation.
-     */
+    /// <summary>
+    /// The class is responsible for handling token generation.
+    /// </summary>
     public class TokenService : ITokenService
     {
         private readonly IConfiguration configuration;
@@ -19,9 +19,11 @@ namespace LibraryManagement.Service
             this.configuration = configuration;
         }
 
-        /**
-         * Method generates token based on user details
-         */
+        /// <summary>
+        /// Method generates token based on user details
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns>JWT token</returns>
         public string GenerateToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(

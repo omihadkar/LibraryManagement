@@ -1,5 +1,8 @@
 ﻿namespace LibraryManagement.Models
 {
+    /// <summary>
+    /// Model class for the Book
+    /// </summary>
     public class Book
     {
         public int Id { get; set; }
