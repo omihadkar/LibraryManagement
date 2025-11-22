@@ -6,6 +6,7 @@ Build me a backend for Library application. Library can have books and clients. 
 
 
 ##Solution has below features
+
 **Authentication:**
 - JWT-based authentication : .Net based JWT authentication.
 - Role-based authorization : It supports two roles : Librarian and Client
