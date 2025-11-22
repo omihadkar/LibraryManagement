@@ -1,6 +1,7 @@
 ﻿using LibraryManagement.Context;
 using LibraryManagement.Models;
 using LibraryManagement.Models.Dto;
+using LibraryManagement.Service;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,31 +12,33 @@ namespace LibraryManagement.Controllers
 {
     public class AuthController : Controller
     {
-        private readonly LibraryContext _context;
-        private readonly string _jwtKey = "19b4cbbfe1c17de8df5bb4c6c4078400";
+        private readonly LibraryContext context;
+        //private readonly string _jwtKey = "19b4cbbfe1c17de8df5bb4c6c4078400";
+        private readonly ITokenService tokenService; 
 
-        public AuthController(LibraryContext context)
+        public AuthController(LibraryContext context, ITokenService tokenService)
         {
-            _context = context;
+            this.context = context;
+            this.tokenService = tokenService;
         }
 
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginDto loginDto)
         {
-            var user = _context.Users.FirstOrDefault(u =>
+            var user = context.Users.FirstOrDefault(u =>
                 u.Username == loginDto.Username && u.Password == loginDto.Password);
 
             if (user == null)
                 return Unauthorized(new { message = "Invalid credentials" });
 
-            var token = GenerateJwtToken(user);
+            var token = tokenService.GenerateToken(user);
             return Ok(new { token, role = user.Role, userId = user.Id });
         }
 
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterDto registerDto)
         {
-            if (_context.Users.Any(u => u.Username == registerDto.Username))
+            if (context.Users.Any(u => u.Username == registerDto.Username))
                 return BadRequest(new { message = "Username already exists" });
 
             var user = new User
@@ -45,13 +48,13 @@ namespace LibraryManagement.Controllers
                 Role = "Client"
             };
 
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            context.Users.Add(user);
+            context.SaveChanges();
 
             return Ok(new { message = "User registered successfully", userId = user.Id });
         }
 
-        private string GenerateJwtToken(User user)
+       /* private string GenerateJwtToken(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_jwtKey);
@@ -69,6 +72,6 @@ namespace LibraryManagement.Controllers
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
-        }
+        }*/
     }
 }
