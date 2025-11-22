@@ -48,8 +48,7 @@ namespace LibraryManagement.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "An unexpected error occurred.");
-                throw;
+                return StatusCode(500, "An unexpected error occurred.");                
             }
 
         }
@@ -73,8 +72,7 @@ namespace LibraryManagement.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "An unexpected error occurred.");
-                throw;
+                return StatusCode(500, "An unexpected error occurred.");                
             }
         }
     }

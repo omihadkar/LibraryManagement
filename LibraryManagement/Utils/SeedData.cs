@@ -58,16 +58,16 @@ namespace LibraryManagement.Utils
                         ISBN = "98754215632",
                         Author = "Gayle Laakmann McDowell",
                         Title = "Cracking the PM Interview",
-                        AvailableCopies = 8,
+                        AvailableCopies = 9,
                         TotalCopies = 10
                     });
                 context.BorrowRecords.AddRange(
-                        new BorrowRecord() { Id = 5, BorrowDate = DateTime.Now.AddDays(-2), IsReturned = false, UserId = 5 },
-                        new BorrowRecord() { Id = 6, BorrowDate = DateTime.Now.AddDays(-10), IsReturned = false, UserId = 6 },
-                        new BorrowRecord() { Id = 3, BorrowDate = DateTime.Now.AddDays(-2), IsReturned = false, UserId = 2 },
-                        new BorrowRecord() { Id = 4, BorrowDate = DateTime.Now.AddDays(-10), IsReturned = false, UserId = 3 },
-                        new BorrowRecord() { Id = 1, BorrowDate = DateTime.Now.AddDays(-2), IsReturned = false, UserId = 2 },
-                        new BorrowRecord() { Id = 2, BorrowDate = DateTime.Now.AddDays(-10), IsReturned = false, UserId = 3 }
+                        new BorrowRecord() { Id = 5, BorrowDate = DateTime.Now.AddDays(-2), IsReturned = false, UserId = 5 ,BookId=3},
+                        new BorrowRecord() { Id = 6, BorrowDate = DateTime.Now.AddDays(-10), IsReturned = false, UserId = 6, BookId = 3 },
+                        new BorrowRecord() { Id = 3, BorrowDate = DateTime.Now.AddDays(-2), IsReturned = false, UserId = 2, BookId = 3 },
+                        new BorrowRecord() { Id = 4, BorrowDate = DateTime.Now.AddDays(-10), IsReturned = false, UserId = 3, BookId = 1 },
+                        new BorrowRecord() { Id = 1, BorrowDate = DateTime.Now.AddDays(-2), IsReturned = false, UserId = 2, BookId = 1 },
+                        new BorrowRecord() { Id = 2, BorrowDate = DateTime.Now.AddDays(-10), IsReturned = false, UserId = 3, BookId = 4 }
                         );
                 context.SaveChanges();
             }

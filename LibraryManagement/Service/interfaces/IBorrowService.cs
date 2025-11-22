@@ -7,9 +7,9 @@ namespace LibraryManagement.Service.interfaces
     /// </summary>
     public interface IBorrowService
     {
-        Task BorrowBook(int bookId);
-        Task ReturnBook(int borrowId);
-        Task<IEnumerable<object>> GetMyBorrows();
+        Task BorrowBook(int bookId, int userId);
+        Task ReturnBook(int borrowId, int userId);
+        Task<IEnumerable<object>> GetMyBorrows(int userId);
         Task<IEnumerable<object>> GetAllBorrows();
     }
 }
