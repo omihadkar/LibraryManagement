@@ -16,13 +16,11 @@ namespace LibraryManagement.Controllers
     [Route("api/[controller]")]
     [Authorize]
     public class BorrowController : ControllerBase
-    {
-        private readonly LibraryContext _context;
+    {        
         private readonly IBorrowService borrowService;
 
-        public BorrowController(LibraryContext context, IBorrowService borrowService)
-        {
-            _context = context;
+        public BorrowController(IBorrowService borrowService)
+        {            
             this.borrowService = borrowService;
         }
 
