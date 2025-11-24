@@ -17,14 +17,12 @@ namespace LibraryManagement.Controllers
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : Controller
-    {
-        private readonly LibraryContext context;
+    {        
         private readonly ITokenService tokenService;
         private readonly IAuthService authService;
 
-        public AuthController(LibraryContext context, ITokenService tokenService, IAuthService authService)
-        {
-            this.context = context;
+        public AuthController(ITokenService tokenService, IAuthService authService)
+        {     
             this.tokenService = tokenService;
             this.authService = authService;
         }
