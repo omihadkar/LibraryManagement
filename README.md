@@ -67,3 +67,16 @@ Added few unit test cases. Not covered everything because of time contraints.
    - Click "Authorize" button (top right of Swagger page)
    - Set the Bearer token in the authorization section
 8. **Perform borrow operations**: You can perform Borrow operations using the same user or any user with "Client" role
+
+
+
+## Sample endpoints:
+1. /ap/Auth/login --> In the request pass for librarian/admin role
+   {
+      "username": "librarian",
+      "password": "admin123"
+   } 
+2. Get the token and pass as heder "Berarer: <JWT token>" in the subsequent protected endpoints request.
+3. /api/Books (GET)--> Public endpoints to fetch books
+4. /api/Books (POST)--> To create books
+5. <TODO>
