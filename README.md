@@ -48,7 +48,7 @@ Build me a backend for Library application. Library can have books and clients. 
 - **Client**: username `client1`, password `pass123`
 
 ## Unit Test Cases
-Added unit test cases specific to service classes. Not covered everything because of time contraints.
+Added few unit test cases. Not covered everything because of time contraints.
 
 ## How to Start the Application
 
